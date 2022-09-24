@@ -31,7 +31,7 @@ namespace SchoolOfDev.Services
             if (userDb is not null) 
                 throw new Exception($"UserName {user.UserName} already exist.");
 
-            _context.Users.Add(userDb);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             return user;
@@ -62,9 +62,9 @@ namespace SchoolOfDev.Services
             return userDb;
         }
 
-        public async Task Update(User userId, int id)
+        public async Task Update(User user, int id)
         {
-            if (userId.Id != id)
+            if (user.Id != id)
                 throw new Exception($"Rout id differs User Id");
 
             User userDb = await _context.Users
@@ -74,7 +74,7 @@ namespace SchoolOfDev.Services
             if (userDb is null)
                 throw new Exception($"User {id} not found.");
 
-            _context.Entry(userDb).State = EntityState.Modified;
+            _context.Entry(user).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
     }
