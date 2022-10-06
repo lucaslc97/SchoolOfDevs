@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolOfDev.Entities;
 using SchoolOfDev.Helpers;
+using BC = BCrypt.Net.BCrypt;
 
 namespace SchoolOfDev.Services
 {
@@ -24,12 +25,17 @@ namespace SchoolOfDev.Services
 
         public async Task<User> CreateUser(User user)
         {
+            if (!user.PassWord.Equals(user.ConfirmPassWord))
+                throw new Exception($"PassWord does not match confirmPassword.");
+
             User userDb = await _context.Users
                 .AsNoTracking()
                 .SingleOrDefaultAsync(u => u.UserName == user.UserName);
 
             if (userDb is not null) 
                 throw new Exception($"UserName {user.UserName} already exist.");
+
+            user.PassWord = BC.HashPassword(user.PassWord);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -66,6 +72,8 @@ namespace SchoolOfDev.Services
         {
             if (user.Id != id)
                 throw new Exception($"Rout id differs User Id");
+            else if (!user.PassWord.Equals(user.ConfirmPassWord))
+                throw new Exception($"PassWord does not match confirmPassword.");
 
             User userDb = await _context.Users
               .AsNoTracking()
@@ -73,6 +81,11 @@ namespace SchoolOfDev.Services
 
             if (userDb is null)
                 throw new Exception($"User {id} not found.");
+            else if (!BC.Verify(user.CurrentPassWord, userDb.PassWord))
+                throw new Exception($"Incorrect Password");
+
+            user.CreatedAt = userDb.CreatedAt;
+            user.PassWord = BC.HashPassword(user.PassWord);
 
             _context.Entry(user).State = EntityState.Modified;
             await _context.SaveChangesAsync();

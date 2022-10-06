@@ -74,6 +74,8 @@ namespace SchoolOfDev.Services
             if (courseDb is null)
                 throw new Exception($"User {id} not found.");
 
+            course.CreatedAt = courseDb.CreatedAt;
+
             _context.Entry(course).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }

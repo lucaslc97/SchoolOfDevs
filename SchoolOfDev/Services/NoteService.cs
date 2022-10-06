@@ -67,6 +67,8 @@ namespace SchoolOfDev.Services
             if (noteDb is null)
                 throw new Exception($"User {id} not found.");
 
+            note.CreatedAt = noteDb.CreatedAt;
+
             _context.Entry(note).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
